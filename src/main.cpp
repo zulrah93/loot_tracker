@@ -1,21 +1,20 @@
 #include <game_state.hpp>
 
-int main()
-{
-    std::shared_ptr<sf::RenderWindow> window = std::make_shared<sf::RenderWindow>(sf::VideoMode(800, 600), "Loot Tracker");
-    game_state_t game_state(window);
-    
-    while (window->isOpen())
-    {
-        
-        game_state.on_event();
+int main() {
+  std::shared_ptr<sf::RenderWindow> window = std::make_shared<sf::RenderWindow>(
+      sf::VideoMode(800, 600), "Loot Tracker");
+  game_state_t game_state(window);
 
-        game_state.clear();
+  while (window->isOpen()) {
 
-        game_state.on_render();
-        
-        window->display();
-    }
+    game_state.on_event();
 
-    return 0;
+    game_state.clear();
+
+    game_state.on_render();
+
+    window->display();
+  }
+
+  return 0;
 }
