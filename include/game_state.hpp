@@ -19,6 +19,8 @@ enum menu_selection_t : uint8_t {
     exit_game
 };
 
+constexpr auto CREDITS_STRING {"Developed by Daniel Lopez -- special thanks to all the gamer friends I made in my life..."};
+
 static const std::initializer_list<std::string> MENU_STRINGS = {"[*] New Game\n[ ] Load Exisiting Game\n[ ] Exit", 
                                                                 "[ ] New Game\n[*] Load Exisiting Game\n[ ] Exit",
                                                                 "[ ] New Game\n[ ] Load Exisiting Game\n[*] Exit" };
@@ -30,22 +32,33 @@ class game_state_t {
             //Load font
             m_font.loadFromFile(std::filesystem::current_path().string() + "/assets/GohuFontuni14NerdFont-Regular.ttf");
             m_true_random_supported_text.setFont(m_font);
-            m_true_random_supported_text.setPosition(sf::Vector2<float>(200, 0.0f));
-            m_true_random_supported_text.setCharacterSize(9);
+            m_true_random_supported_text.setPosition(sf::Vector2<float>(150.0f, 0.0f));
+            m_true_random_supported_text.setCharacterSize(11);
+            
             //Initial title screen setup
             m_title_screen_text.setFont(m_font);
-            m_title_screen_text.setPosition(sf::Vector2<float>(310.0f, 200.0f));
+            m_title_screen_text.setPosition(sf::Vector2<float>(295.0f, 130.0f));
             m_title_screen_text.setCharacterSize(25);
             m_title_screen_text.setString("Loot Tracker");
+            m_title_screen_text.setColor(sf::Color::Cyan);
+            
             //Initial menu text setup
             m_menu_text.setFont(m_font);
-            m_menu_text.setPosition(sf::Vector2<float>(290.0f, 280.0f));
+            m_menu_text.setPosition(sf::Vector2<float>(275.0f, 200.0f));
             m_menu_text.setCharacterSize(20);
-            m_menu_text.setString(*MENU_STRINGS.begin());  
+            m_menu_text.setString(*MENU_STRINGS.begin());
+            m_menu_text.setColor(sf::Color::Cyan);
+            
+            //Initial credits text
+            m_credits_text.setFont(m_font);
+            m_credits_text.setPosition(sf::Vector2<float>(172.0f, 574.0f));
+            m_credits_text.setCharacterSize(9);
+            m_credits_text.setString(CREDITS_STRING);
+            m_credits_text.setColor(sf::Color::White);
+            
             // Load menu background
             m_texture.loadFromFile(std::filesystem::current_path().string() + "/assets/loot_tracker.png");
-            m_menu_background.setPosition(sf::Vector2<float>(0.0f, 200.0f));
-            m_menu_background.setOrigin(sf::Vector2<float>(0.0f, 0.0f));
+            m_menu_background.setOrigin(sf::Vector2<float>(0.0f, 35.0f));
             m_menu_background.setTexture(m_texture);
         }
 
@@ -137,6 +150,7 @@ private:
                     window->draw(m_true_random_supported_text);
                     window->draw(m_title_screen_text);
                     window->draw(m_menu_text);
+                    window->draw(m_credits_text);
             }
         }
 
@@ -150,6 +164,7 @@ private:
         sf::Text m_true_random_supported_text;
         sf::Text m_title_screen_text;
         sf::Text m_menu_text;
+        sf::Text m_credits_text;
         bool m_true_rng_supported;
         game_mode_t m_mode;
         size_t m_selection_index{0};
