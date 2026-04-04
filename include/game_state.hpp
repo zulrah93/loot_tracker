@@ -30,18 +30,23 @@ class game_state_t {
             //Load font
             m_font.loadFromFile(std::filesystem::current_path().string() + "/assets/GohuFontuni14NerdFont-Regular.ttf");
             m_true_random_supported_text.setFont(m_font);
-            m_true_random_supported_text.setPosition(sf::Vector2<float>(0.0f, 0.0f));
+            m_true_random_supported_text.setPosition(sf::Vector2<float>(200, 0.0f));
             m_true_random_supported_text.setCharacterSize(9);
             //Initial title screen setup
             m_title_screen_text.setFont(m_font);
-            m_title_screen_text.setPosition(sf::Vector2<float>(340.0f, 100.0f));
-            m_title_screen_text.setCharacterSize(20);
+            m_title_screen_text.setPosition(sf::Vector2<float>(310.0f, 200.0f));
+            m_title_screen_text.setCharacterSize(25);
             m_title_screen_text.setString("Loot Tracker");
             //Initial menu text setup
             m_menu_text.setFont(m_font);
-            m_menu_text.setPosition(sf::Vector2<float>(320.0f, 140.0f));
-            m_menu_text.setCharacterSize(15);
-            m_menu_text.setString(*MENU_STRINGS.begin());   
+            m_menu_text.setPosition(sf::Vector2<float>(290.0f, 280.0f));
+            m_menu_text.setCharacterSize(20);
+            m_menu_text.setString(*MENU_STRINGS.begin());  
+            // Load menu background
+            m_texture.loadFromFile(std::filesystem::current_path().string() + "/assets/loot_tracker.png");
+            m_menu_background.setPosition(sf::Vector2<float>(0.0f, 200.0f));
+            m_menu_background.setOrigin(sf::Vector2<float>(0.0f, 0.0f));
+            m_menu_background.setTexture(m_texture);
         }
 
         void on_event() {
@@ -71,11 +76,6 @@ class game_state_t {
         void clear() {
             if (auto window = m_weak_render_window.lock()) {
                 window->clear(sf::Color::Black);
-                if (m_mode == game_mode_t::menu) {
-                    window->draw(m_true_random_supported_text);
-                    window->draw(m_title_screen_text);
-                    window->draw(m_menu_text);
-                }
             }   
         }
 private:
@@ -105,6 +105,16 @@ private:
                     }
                 }
 
+                [[likely]]
+                if (m_true_rng_supported) {
+                    m_true_random_supported_text.setColor(sf::Color::Green);
+                    m_true_random_supported_text.setString("Hardware true random will be used in this game and is supported by your x86_64 machine..." );
+                }
+                else {
+                    m_true_random_supported_text.setColor(sf::Color::Red);
+                    m_true_random_supported_text.setString("Hardware true random not supported by your x86_64 machine will be using the standard random...");
+                }
+
                 m_menu_text.setString(*(MENU_STRINGS.begin() + m_selection_index));
             }
         }
@@ -123,16 +133,10 @@ private:
 
         void on_render_menu() {
              if (auto window = m_weak_render_window.lock()) {
-                
-                [[likely]]
-                if (m_true_rng_supported) {
-                    m_true_random_supported_text.setColor(sf::Color::Green);
-                    m_true_random_supported_text.setString("Hardware true random will be used in this game and is supported by your x86_64 machine..." );
-                }
-                else {
-                    m_true_random_supported_text.setColor(sf::Color::Red);
-                    m_true_random_supported_text.setString("Hardware true random not supported by your x86_64 machine will be using the standard random...");
-                }
+                    window->draw(m_menu_background);
+                    window->draw(m_true_random_supported_text);
+                    window->draw(m_title_screen_text);
+                    window->draw(m_menu_text);
             }
         }
 
@@ -149,6 +153,8 @@ private:
         bool m_true_rng_supported;
         game_mode_t m_mode;
         size_t m_selection_index{0};
+        sf::Texture m_texture;
+        sf::Sprite m_menu_background;
 };
 
 #endif
