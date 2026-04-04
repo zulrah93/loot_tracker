@@ -22,7 +22,10 @@ Kill, loot, repeat, with the loot basically improving your character, healing mo
 
 # Example screenshot of overworld
 
+## TBD
 
 
-#Example screenshot of battling
+# Example screenshot of battling
+
+## TBD
 
