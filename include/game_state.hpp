@@ -1,7 +1,6 @@
 #ifndef GAME_STATE_H
 #define GAME_STATE_H
 #include <SFML/Graphics.hpp>
-#include <account_http_server.hpp>
 #include <filesystem>
 #include <memory>
 #include <monster_t.hpp>
@@ -18,8 +17,9 @@ enum game_mode_t : uint8_t {
 
 enum menu_selection_t : uint8_t { new_game = 0, existing_game, exit_game };
 
-constexpr auto CREDITS_STRING{"Developed by Daniel Lopez -- special thanks to "
-                              "all the gamer friends I have made in my life..."};
+constexpr auto CREDITS_STRING{
+    "Developed by Daniel Lopez -- special thanks to "
+    "all the gamer friends I have made in my life..."};
 
 static const std::initializer_list<std::string> MENU_STRINGS = {
     "[*] New Game\n[ ] Load Exisiting Game\n[ ] Exit",
@@ -61,10 +61,10 @@ public:
     m_credits_text.setColor(sf::Color::White);
 
     // Initial text for instructions for loading account or creating account
-    m_account_text.setFont(m_font);
-    m_account_text.setPosition(sf::Vector2<float>(55.0f, 245.0f));
-    m_account_text.setCharacterSize(11);
-    m_account_text.setColor(sf::Color::Yellow);
+    m_new_character_name.setFont(m_font);
+    m_new_character_name.setPosition(sf::Vector2<float>(55.0f, 245.0f));
+    m_new_character_name.setCharacterSize(11);
+    m_new_character_name.setColor(sf::Color::Yellow);
 
     // Load menu background
     m_texture.loadFromFile(std::filesystem::current_path().string() +
@@ -83,7 +83,7 @@ public:
       on_event_account_creation();
       break;
     }
-     case game_mode_t::account_loading: {
+    case game_mode_t::account_loading: {
       on_event_account_loading();
       break;
     }
@@ -103,7 +103,7 @@ public:
       on_render_account_creation();
       break;
     }
-     case game_mode_t::account_loading: {
+    case game_mode_t::account_loading: {
       on_render_account_loading();
       break;
     }
@@ -141,18 +141,22 @@ private:
                 menu_selection_t::exit_game); // Take the highest enum value
           }
         }
+
+        if ((event.type == sf::Event::TextEntered) && event.text.unicode < 128) {
+            m_new_character_name_input.setString(m_new_character_name_input.getString() + event.text.unicode);
+        }
+
         if ((event.type == sf::Event::KeyPressed) &&
             (event.key.code == sf::Keyboard::Enter)) {
           switch (static_cast<menu_selection_t>(m_selection_index)) {
           case menu_selection_t::new_game: {
             m_mode = game_mode_t::account_creation;
-            m_account_text.setString("To create an account visit http://127.0.0.1:8080 screen will close once you follow account creation instructions...");
+            m_new_character_name.setString("Character Name: ");
+            m_new_character_name.setPosition(sf::Vector2f(50.0f, 150.0f));
             break;
           }
           case menu_selection_t::existing_game: {
             m_mode = game_mode_t::account_loading;
-            m_account_text.setString("To load an existing account visit http://127.0.0.1:8080 screen will close once you follow account creation instructions...");
-            m_account_text.setPosition(sf::Vector2<float>(40.0f, 245.0f));
             break;
           }
           case menu_selection_t::exit_game: {
@@ -187,26 +191,22 @@ private:
 
   void on_event_battle() {}
 
-  void on_event_account_creation() {
+  void on_event_account_creation() {}
 
-  }
-
-  void on_event_account_loading() {
-
-  }
+  void on_event_account_loading() {}
 
   void on_render_account_creation() {
-        if (auto window = m_weak_render_window.lock()) {
-            window->draw(m_menu_background);
-            window->draw(m_account_text);
-        }
+    if (auto window = m_weak_render_window.lock()) {
+      window->draw(m_menu_background);
+      window->draw(m_new_character_name);
+    }
   }
 
   void on_render_account_loading() {
-        if (auto window = m_weak_render_window.lock()) {
-            window->draw(m_menu_background);
-            window->draw(m_account_text);
-        }
+    if (auto window = m_weak_render_window.lock()) {
+      window->draw(m_menu_background);
+      window->draw(m_new_character_name);
+    }
   }
 
   void on_render_overworld() {}
@@ -230,7 +230,8 @@ private:
   sf::Text m_title_screen_text;
   sf::Text m_menu_text;
   sf::Text m_credits_text;
-  sf::Text m_account_text;
+  sf::Text m_new_character_name;
+  sf::Text m_new_character_name_input;
   bool m_true_rng_supported;
   game_mode_t m_mode;
   size_t m_selection_index{0};
