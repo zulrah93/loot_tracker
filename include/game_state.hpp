@@ -6,6 +6,9 @@
 #include <monster_t.hpp>
 #include <player_metadata_t.hpp>
 #include <true_rng_t.hpp>
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 enum game_mode_t : uint8_t {
   menu = 0,
@@ -62,9 +65,13 @@ public:
 
     // Initial text for instructions for loading account or creating account
     m_new_character_name.setFont(m_font);
-    m_new_character_name.setPosition(sf::Vector2<float>(55.0f, 245.0f));
     m_new_character_name.setCharacterSize(11);
-    m_new_character_name.setColor(sf::Color::Yellow);
+    m_new_character_name.setColor(sf::Color::Cyan);
+    m_new_character_name.setString("Character Name: ");
+    m_new_character_name.setPosition(sf::Vector2f(50.0f, 150.0f));
+    m_new_character_name_input.setPosition(sf::Vector2f(150.0f, 150.0f));
+    m_new_character_name_input.setString(m_input_field);
+    m_new_character_name_input.setColor(sf::Color::Cyan);
 
     // Load menu background
     m_texture.loadFromFile(std::filesystem::current_path().string() +
@@ -142,17 +149,11 @@ private:
           }
         }
 
-        if ((event.type == sf::Event::TextEntered) && event.text.unicode < 128) {
-            m_new_character_name_input.setString(m_new_character_name_input.getString() + event.text.unicode);
-        }
-
         if ((event.type == sf::Event::KeyPressed) &&
             (event.key.code == sf::Keyboard::Enter)) {
           switch (static_cast<menu_selection_t>(m_selection_index)) {
           case menu_selection_t::new_game: {
             m_mode = game_mode_t::account_creation;
-            m_new_character_name.setString("Character Name: ");
-            m_new_character_name.setPosition(sf::Vector2f(50.0f, 150.0f));
             break;
           }
           case menu_selection_t::existing_game: {
@@ -191,7 +192,19 @@ private:
 
   void on_event_battle() {}
 
-  void on_event_account_creation() {}
+  void on_event_account_creation() {
+    if (auto window = m_weak_render_window.lock()) {
+      sf::Event event;
+      while (window->pollEvent(event)) {
+        if ((event.type == sf::Event::TextEntered)) {
+#ifdef DEBUG
+            std::cout << static_cast<char>(event.text.unicode) << " " << std::endl;
+#endif
+          m_input_field += static_cast<char>(event.text.unicode);
+        }
+      }
+    }
+  }
 
   void on_event_account_loading() {}
 
@@ -199,6 +212,8 @@ private:
     if (auto window = m_weak_render_window.lock()) {
       window->draw(m_menu_background);
       window->draw(m_new_character_name);
+      m_new_character_name_input.setString(m_input_field);
+      window->draw(m_new_character_name_input);
     }
   }
 
@@ -232,6 +247,7 @@ private:
   sf::Text m_credits_text;
   sf::Text m_new_character_name;
   sf::Text m_new_character_name_input;
+  sf::String m_input_field;
   bool m_true_rng_supported;
   game_mode_t m_mode;
   size_t m_selection_index{0};
