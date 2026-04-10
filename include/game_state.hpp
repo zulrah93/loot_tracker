@@ -6,9 +6,6 @@
 #include <monster_t.hpp>
 #include <player_metadata_t.hpp>
 #include <true_rng_t.hpp>
-#ifdef DEBUG
-#include <iostream>
-#endif
 
 enum game_mode_t : uint8_t {
   menu = 0,
@@ -28,6 +25,17 @@ static const std::initializer_list<std::string> MENU_STRINGS = {
     "[*] New Game\n[ ] Load Exisiting Game\n[ ] Exit",
     "[ ] New Game\n[*] Load Exisiting Game\n[ ] Exit",
     "[ ] New Game\n[ ] Load Exisiting Game\n[*] Exit"};
+
+static const std::initializer_list<std::string> SELECT_CLASS_STRINGS = {
+    "[*] attacker (like healer just cannot heal or not as tanky)\n[ ] caster "
+    "(magic no more explanation "
+    ":P)\n[ ] healer (healing tank slow damage but survivable)",
+    "[ ] attacker (like healer just cannot heal or not as tanky)\n[*] caster "
+    "(magic no more explanation "
+    ":P)\n[ ] healer (healing tank slow damage but survivable)",
+    "[ ] attacker (like healer just cannot heal or not as tanky)\n[ ] caster "
+    "(magic no more explanation "
+    ":P)\n[*] healer (healing tank slow damage but survivable)"};
 
 class game_state_t {
 public:
@@ -51,7 +59,7 @@ public:
 
     // Initial menu text setup
     m_menu_text.setFont(m_font);
-    m_menu_text.setPosition(sf::Vector2<float>(275.0f, 200.0f));
+    m_menu_text.setPosition(sf::Vector2<float>(295.0f, 240.0f));
     m_menu_text.setCharacterSize(20);
     m_menu_text.setString(*MENU_STRINGS.begin());
     m_menu_text.setColor(sf::Color::Cyan);
@@ -65,13 +73,17 @@ public:
 
     // Initial text for instructions for loading account or creating account
     m_new_character_name.setFont(m_font);
-    m_new_character_name.setCharacterSize(11);
+    m_new_character_name.setCharacterSize(14);
     m_new_character_name.setColor(sf::Color::Cyan);
     m_new_character_name.setString("Character Name: ");
-    m_new_character_name.setPosition(sf::Vector2f(50.0f, 150.0f));
-    m_new_character_name_input.setPosition(sf::Vector2f(150.0f, 150.0f));
-    m_new_character_name_input.setString(m_input_field);
-    m_new_character_name_input.setColor(sf::Color::Cyan);
+    m_new_character_name.setPosition(sf::Vector2f(210.0f, 240.0f));
+
+    // Initial character class selection text setup
+    m_character_selection_text.setFont(m_font);
+    m_character_selection_text.setPosition(sf::Vector2<float>(110.0f, 140.0f));
+    m_character_selection_text.setCharacterSize(15);
+    m_character_selection_text.setString(*SELECT_CLASS_STRINGS.begin());
+    m_character_selection_text.setColor(sf::Color::Cyan);
 
     // Load menu background
     m_texture.loadFromFile(std::filesystem::current_path().string() +
@@ -196,11 +208,14 @@ private:
     if (auto window = m_weak_render_window.lock()) {
       sf::Event event;
       while (window->pollEvent(event)) {
-        if ((event.type == sf::Event::TextEntered)) {
-#ifdef DEBUG
-            std::cout << static_cast<char>(event.text.unicode) << " " << std::endl;
-#endif
-          m_input_field += static_cast<char>(event.text.unicode);
+        if ((event.type == sf::Event::TextEntered) &&
+            (0 != std::isprint(event.text.unicode))) {
+          m_new_character_name.setString(m_new_character_name.getString() +
+                                         static_cast<char>(event.text.unicode));
+        }
+        if ((event.type == sf::Event::KeyPressed) &&
+            (event.key.code == sf::Keyboard::Escape)) {
+          m_mode = game_mode_t::menu;
         }
       }
     }
@@ -212,8 +227,7 @@ private:
     if (auto window = m_weak_render_window.lock()) {
       window->draw(m_menu_background);
       window->draw(m_new_character_name);
-      m_new_character_name_input.setString(m_input_field);
-      window->draw(m_new_character_name_input);
+      window->draw(m_character_selection_text);
     }
   }
 
@@ -246,11 +260,11 @@ private:
   sf::Text m_menu_text;
   sf::Text m_credits_text;
   sf::Text m_new_character_name;
-  sf::Text m_new_character_name_input;
-  sf::String m_input_field;
+  sf::Text m_character_selection_text;
   bool m_true_rng_supported;
   game_mode_t m_mode;
   size_t m_selection_index{0};
+  size_t m_character_selection_index{0};
   sf::Texture m_texture;
   sf::Sprite m_menu_background;
 };
