@@ -18,8 +18,9 @@ enum player_class_t : uint8_t {
 };
 
 struct player_metadata_t {
-  char player_name[MAX_CHARACTER_NAME_LIMIT]; // C string to save this later on disk more easily
-                        // without serialization
+  char player_name[MAX_CHARACTER_NAME_LIMIT]; // C string to save this later on
+                                              // disk more easily without
+                                              // serialization
   player_class_t selected_class;
   uint8_t attack_skill_points;  // Skill points go from 1 to 255
   uint8_t defense_skill_points; // Same as above

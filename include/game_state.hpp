@@ -37,8 +37,9 @@ static const std::initializer_list<std::string> SELECT_CLASS_STRINGS = {
     "(magic no more explanation "
     ":P)\n[*] healer (healing tank slow damage but survivable)"};
 
-
-static const auto INSTRUCTIONS_FOR_ACCOUNT_CREATION{"Press escape to go back or press backspace to delete character in character name, once you have a name and class selected press enter..."};
+static const auto INSTRUCTIONS_FOR_ACCOUNT_CREATION{
+    "Press escape to go back or press backspace to delete character in "
+    "character name, once you have a name and class selected press enter..."};
 
 class game_state_t {
 public:
@@ -89,16 +90,24 @@ public:
     m_character_selection_text.setColor(sf::Color::Cyan);
 
     m_account_loading_creation_instructions_text.setFont(m_font);
-    m_account_loading_creation_instructions_text.setPosition(sf::Vector2<float>(60.0f, 20.0f));
+    m_account_loading_creation_instructions_text.setPosition(
+        sf::Vector2<float>(60.0f, 20.0f));
     m_account_loading_creation_instructions_text.setCharacterSize(9);
-    m_account_loading_creation_instructions_text.setString(INSTRUCTIONS_FOR_ACCOUNT_CREATION);
+    m_account_loading_creation_instructions_text.setString(
+        INSTRUCTIONS_FOR_ACCOUNT_CREATION);
     m_account_loading_creation_instructions_text.setColor(sf::Color::White);
 
     // Load menu background
-    m_texture.loadFromFile(std::filesystem::current_path().string() +
-                           "/assets/loot_tracker.png");
+    m_menu_texture.loadFromFile(std::filesystem::current_path().string() +
+                                "/assets/loot_tracker.png");
     m_menu_background.setOrigin(sf::Vector2<float>(0.0f, 35.0f));
-    m_menu_background.setTexture(m_texture);
+    m_menu_background.setTexture(m_menu_texture);
+
+    // Load overworld background
+    m_overworld_texture.loadFromFile(std::filesystem::current_path().string() +
+                                     "/assets/overworld_bg.png");
+    m_overworld_background.setOrigin(sf::Vector2<float>(0.0f, 0.0f));
+    m_overworld_background.setTexture(m_overworld_texture);
   }
 
   void on_event() {
@@ -113,6 +122,10 @@ public:
     }
     case game_mode_t::account_loading: {
       on_event_account_loading();
+      break;
+    }
+    case game_mode_t::overworld: {
+      on_event_overworld();
       break;
     }
     default: {
@@ -133,6 +146,10 @@ public:
     }
     case game_mode_t::account_loading: {
       on_render_account_loading();
+      break;
+    }
+    case game_mode_t::overworld: {
+      on_render_overworld();
       break;
     }
     default: {
@@ -219,32 +236,55 @@ private:
       while (window->pollEvent(event)) {
         if ((event.type == sf::Event::TextEntered) &&
             (0 != std::isprint(event.text.unicode))) {
-          m_new_character_name.setString(m_new_character_name.getString() +
-                                         static_cast<char>(event.text.unicode));
+
+          if (MAX_CHARACTER_NAME_LIMIT > temp_character_name.size()) {
+            m_new_character_name.setString(
+                m_new_character_name.getString() +
+                static_cast<char>(event.text.unicode));
+            temp_character_name += static_cast<char>(event.text.unicode);
+          }
         }
         if ((event.type == sf::Event::KeyPressed) &&
             (event.key.code == sf::Keyboard::Down)) {
-              m_character_selection_index++;
-              m_character_selection_index %= (static_cast<size_t>(player_class_t::healer));
+          m_character_selection_index++;
+          m_character_selection_index %=
+              (static_cast<size_t>(player_class_t::healer));
         }
         if ((event.type == sf::Event::KeyPressed) &&
             (event.key.code == sf::Keyboard::Up)) {
-            if (m_character_selection_index > 0) {
-              m_character_selection_index--;
-            }
-            else {
-                m_character_selection_index = static_cast<size_t>(player_class_t::healer) - 1;
-            }
+          if (m_character_selection_index > 0) {
+            m_character_selection_index--;
+          } else {
+            m_character_selection_index =
+                static_cast<size_t>(player_class_t::healer) - 1;
+          }
         }
         if ((event.type == sf::Event::KeyPressed) &&
             (event.key.code == sf::Keyboard::BackSpace)) {
-              m_new_character_name.setString(sf::String::fromUtf8(m_new_character_name.getString().begin(), m_new_character_name.getString().end() - 1));
+
+          if (temp_character_name.size() > 0) {
+            m_new_character_name.setString(sf::String::fromUtf8(
+                m_new_character_name.getString().begin(),
+                m_new_character_name.getString().end() - 1));
+            temp_character_name =
+                temp_character_name.substr(0, temp_character_name.size() - 1);
+          }
         }
         if ((event.type == sf::Event::KeyPressed) &&
             (event.key.code == sf::Keyboard::Escape)) {
           m_mode = game_mode_t::menu;
         }
-        m_character_selection_text.setString(*(SELECT_CLASS_STRINGS.begin() + m_character_selection_index));
+        if ((event.type == sf::Event::KeyPressed) &&
+            (event.key.code == sf::Keyboard::Enter)) {
+
+          strncpy(m_player.player_name, temp_character_name.c_str(),
+                  MAX_CHARACTER_NAME_LIMIT);
+          m_player.selected_class =
+              static_cast<player_class_t>(m_character_selection_index + 1);
+          m_mode = game_mode_t::overworld;
+        }
+        m_character_selection_text.setString(
+            *(SELECT_CLASS_STRINGS.begin() + m_character_selection_index));
       }
     }
   }
@@ -267,7 +307,11 @@ private:
     }
   }
 
-  void on_render_overworld() {}
+  void on_render_overworld() {
+    if (auto window = m_weak_render_window.lock()) {
+      window->draw(m_overworld_background);
+    }
+  }
 
   void on_render_menu() {
     if (auto window = m_weak_render_window.lock()) {
@@ -295,8 +339,11 @@ private:
   game_mode_t m_mode;
   size_t m_selection_index{0};
   size_t m_character_selection_index{0};
-  sf::Texture m_texture;
+  std::string temp_character_name;
+  sf::Texture m_menu_texture;
   sf::Sprite m_menu_background;
+  sf::Texture m_overworld_texture;
+  sf::Sprite m_overworld_background;
 };
 
 #endif
