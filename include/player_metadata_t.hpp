@@ -8,6 +8,7 @@
 
 constexpr const size_t MAX_XP{13000000};
 constexpr const size_t MAX_HP{100};
+constexpr const size_t MAX_CHARACTER_NAME_LIMIT{16};
 
 enum player_class_t : uint8_t {
   invalid_class = 0,
@@ -17,7 +18,7 @@ enum player_class_t : uint8_t {
 };
 
 struct player_metadata_t {
-  char player_name[16]; // C string to save this later on disk more easily
+  char player_name[MAX_CHARACTER_NAME_LIMIT]; // C string to save this later on disk more easily
                         // without serialization
   player_class_t selected_class;
   uint8_t attack_skill_points;  // Skill points go from 1 to 255

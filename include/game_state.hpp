@@ -37,6 +37,9 @@ static const std::initializer_list<std::string> SELECT_CLASS_STRINGS = {
     "(magic no more explanation "
     ":P)\n[*] healer (healing tank slow damage but survivable)"};
 
+
+static const auto INSTRUCTIONS_FOR_ACCOUNT_CREATION{"Press escape to go back or press backspace to delete character in character name, once you have a name and class selected press enter..."};
+
 class game_state_t {
 public:
   game_state_t(std::weak_ptr<sf::RenderWindow> weak_render_window)
@@ -76,14 +79,20 @@ public:
     m_new_character_name.setCharacterSize(14);
     m_new_character_name.setColor(sf::Color::Cyan);
     m_new_character_name.setString("Character Name: ");
-    m_new_character_name.setPosition(sf::Vector2f(210.0f, 240.0f));
+    m_new_character_name.setPosition(sf::Vector2f(210.0f, 200.0f));
 
     // Initial character class selection text setup
     m_character_selection_text.setFont(m_font);
-    m_character_selection_text.setPosition(sf::Vector2<float>(110.0f, 140.0f));
+    m_character_selection_text.setPosition(sf::Vector2<float>(110.0f, 100.0f));
     m_character_selection_text.setCharacterSize(15);
     m_character_selection_text.setString(*SELECT_CLASS_STRINGS.begin());
     m_character_selection_text.setColor(sf::Color::Cyan);
+
+    m_account_loading_creation_instructions_text.setFont(m_font);
+    m_account_loading_creation_instructions_text.setPosition(sf::Vector2<float>(60.0f, 20.0f));
+    m_account_loading_creation_instructions_text.setCharacterSize(9);
+    m_account_loading_creation_instructions_text.setString(INSTRUCTIONS_FOR_ACCOUNT_CREATION);
+    m_account_loading_creation_instructions_text.setColor(sf::Color::White);
 
     // Load menu background
     m_texture.loadFromFile(std::filesystem::current_path().string() +
@@ -214,9 +223,28 @@ private:
                                          static_cast<char>(event.text.unicode));
         }
         if ((event.type == sf::Event::KeyPressed) &&
+            (event.key.code == sf::Keyboard::Down)) {
+              m_character_selection_index++;
+              m_character_selection_index %= (static_cast<size_t>(player_class_t::healer));
+        }
+        if ((event.type == sf::Event::KeyPressed) &&
+            (event.key.code == sf::Keyboard::Up)) {
+            if (m_character_selection_index > 0) {
+              m_character_selection_index--;
+            }
+            else {
+                m_character_selection_index = static_cast<size_t>(player_class_t::healer) - 1;
+            }
+        }
+        if ((event.type == sf::Event::KeyPressed) &&
+            (event.key.code == sf::Keyboard::BackSpace)) {
+              m_new_character_name.setString(sf::String::fromUtf8(m_new_character_name.getString().begin(), m_new_character_name.getString().end() - 1));
+        }
+        if ((event.type == sf::Event::KeyPressed) &&
             (event.key.code == sf::Keyboard::Escape)) {
           m_mode = game_mode_t::menu;
         }
+        m_character_selection_text.setString(*(SELECT_CLASS_STRINGS.begin() + m_character_selection_index));
       }
     }
   }
@@ -228,13 +256,14 @@ private:
       window->draw(m_menu_background);
       window->draw(m_new_character_name);
       window->draw(m_character_selection_text);
+      window->draw(m_account_loading_creation_instructions_text);
     }
   }
 
   void on_render_account_loading() {
     if (auto window = m_weak_render_window.lock()) {
       window->draw(m_menu_background);
-      window->draw(m_new_character_name);
+      window->draw(m_account_loading_creation_instructions_text);
     }
   }
 
@@ -261,6 +290,7 @@ private:
   sf::Text m_credits_text;
   sf::Text m_new_character_name;
   sf::Text m_character_selection_text;
+  sf::Text m_account_loading_creation_instructions_text;
   bool m_true_rng_supported;
   game_mode_t m_mode;
   size_t m_selection_index{0};
