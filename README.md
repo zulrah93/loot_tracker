@@ -20,12 +20,13 @@ Kill, loot, repeat, with the loot basically improving your character, healing mo
 
 <img src="https://raw.githubusercontent.com/zulrah93/loot_tracker/refs/heads/master/screenshot.bmp"/>
 
-# Example screenshot of overworld
+# Example screenshot of account creation [WIP]
 
 <img src="https://raw.githubusercontent.com/zulrah93/loot_tracker/refs/heads/master/screenshot_account_creation.bmp"/>
 
-## TBD
+# Example screenshot of overworld
 
+## TBD
 
 # Example screenshot of battling
 
