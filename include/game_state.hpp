@@ -2,6 +2,7 @@
 #define GAME_STATE_H
 #include <SFML/Graphics.hpp>
 #include <filesystem>
+#include <format>
 #include <memory>
 #include <monster_t.hpp>
 #include <player_metadata_t.hpp>
@@ -88,6 +89,11 @@ public:
     m_character_selection_text.setCharacterSize(15);
     m_character_selection_text.setString(*SELECT_CLASS_STRINGS.begin());
     m_character_selection_text.setColor(sf::Color::Cyan);
+
+    m_player_stats_hud_text.setFont(m_font);
+    m_player_stats_hud_text.setPosition(sf::Vector2<float>(28.0f, 485.0f));
+    m_player_stats_hud_text.setCharacterSize(11);
+    m_player_stats_hud_text.setColor(sf::Color::White);
 
     m_account_loading_creation_instructions_text.setFont(m_font);
     m_account_loading_creation_instructions_text.setPosition(
@@ -280,10 +286,22 @@ private:
           strncpy(m_player.player_name, temp_character_name.c_str(),
                   MAX_CHARACTER_NAME_LIMIT);
 
-          const player_stats_t* selected_default_stats = (DEFAULT_CLASS_STATS.begin() + (m_character_selection_index + 1));
+          const player_stats_t *selected_default_stats =
+              (DEFAULT_CLASS_STATS.begin() + (m_character_selection_index + 1));
           m_player.selected_class =
               static_cast<player_class_t>(m_character_selection_index + 1);
-          memcpy(&m_player.stats, selected_default_stats, sizeof(player_stats_t));
+          memcpy(&m_player.stats, selected_default_stats,
+                 sizeof(player_stats_t));
+          m_player_stats_hud_text.setString(
+              std::format("character name: {} \nattack_skill_points: {} \n"
+                          "defense_skill_points: {} \nhealth_skill_points: {} \n"
+                          "health: {} \nattack: {} \ndefense: {} \narmor: {}",
+                          m_player.player_name,
+                          m_player.stats.attack_skill_points,
+                          m_player.stats.defense_skill_points,
+                          m_player.stats.health_skill_points,
+                          m_player.stats.health, m_player.stats.attack,
+                          m_player.stats.defense, m_player.stats.armor));
           m_mode = game_mode_t::overworld;
         }
         m_character_selection_text.setString(
@@ -313,6 +331,7 @@ private:
   void on_render_overworld() {
     if (auto window = m_weak_render_window.lock()) {
       window->draw(m_overworld_background);
+      window->draw(m_player_stats_hud_text);
     }
   }
 
@@ -338,6 +357,7 @@ private:
   sf::Text m_new_character_name;
   sf::Text m_character_selection_text;
   sf::Text m_account_loading_creation_instructions_text;
+  sf::Text m_player_stats_hud_text;
   bool m_true_rng_supported;
   game_mode_t m_mode;
   size_t m_selection_index{0};
