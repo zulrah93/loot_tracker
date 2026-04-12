@@ -17,19 +17,30 @@ enum player_class_t : uint8_t {
   healer = 3
 };
 
+struct player_stats_t {
+  uint8_t attack_skill_points;  // Skill points go from 1 to 255
+  uint8_t defense_skill_points; // Same as above
+  uint8_t health_skill_points;  // Same as above
+  uint8_t health;
+  uint8_t attack;
+  uint8_t defense;
+  uint8_t armor;
+} __attribute__((packed));
+
+constexpr std::initializer_list<player_stats_t> DEFAULT_CLASS_STATS { // Index zero is the invalid class thus stats will be zero
+    {.attack_skill_points = 0, .defense_skill_points = 0, .health_skill_points = 0, .health = 0, .attack = 0, .defense = 0, .armor = 0 },
+     {.attack_skill_points = 5, .defense_skill_points = 3, .health_skill_points = 1, .health = MAX_HP, .attack = 120, .defense = 100, .armor = 0 }, // Everyone starts with no armor -- naked
+      {.attack_skill_points = 1, .defense_skill_points = 1, .health_skill_points = 1, .health = MAX_HP, .attack = 120, .defense = 50, .armor = 0 }, // Caster sacrifices defence for its ability to kite enemies and avoid damage from time to time
+       {.attack_skill_points = 1, .defense_skill_points = 5, .health_skill_points = 5, .health = MAX_HP, .attack = 60, .defense = 150, .armor = 0 } // Tanky sacrifice attack for less damage and you get healing ability
+};
+
 struct player_metadata_t {
   char player_name[MAX_CHARACTER_NAME_LIMIT]; // C string to save this later on
                                               // disk more easily without
                                               // serialization
   player_class_t selected_class;
-  uint8_t attack_skill_points;  // Skill points go from 1 to 255
-  uint8_t defense_skill_points; // Same as above
-  uint8_t health_skill_points;  // Same as above
+  player_stats_t stats;
   uint64_t experience;
-  uint8_t health;
-  uint8_t attack;
-  uint8_t defense;
-  uint8_t armor;
 } __attribute__((packed));
 
 uint8_t experience_to_level(const player_metadata_t &player_meta_data) {

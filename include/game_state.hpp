@@ -279,8 +279,11 @@ private:
 
           strncpy(m_player.player_name, temp_character_name.c_str(),
                   MAX_CHARACTER_NAME_LIMIT);
+
+          const player_stats_t* selected_default_stats = (DEFAULT_CLASS_STATS.begin() + (m_character_selection_index + 1));
           m_player.selected_class =
               static_cast<player_class_t>(m_character_selection_index + 1);
+          memcpy(&m_player.stats, selected_default_stats, sizeof(player_stats_t));
           m_mode = game_mode_t::overworld;
         }
         m_character_selection_text.setString(
