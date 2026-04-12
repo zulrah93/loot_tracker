@@ -26,6 +26,9 @@ Kill, loot, repeat, with the loot basically improving your character, healing mo
 
 # Example screenshot of overworld
 
+
+<img src="https://raw.githubusercontent.com/zulrah93/loot_tracker/refs/heads/master/screenshot_overworld.bmp"/>
+
 ## TBD
 
 # Example screenshot of battling
