@@ -52,7 +52,7 @@ public:
     m_font.loadFromFile(std::filesystem::current_path().string() +
                         "/GohuFontuni14NerdFont-Regular.ttf");
     m_true_random_supported_text.setFont(m_font);
-    m_true_random_supported_text.setPosition(sf::Vector2<float>(150.0f, 0.0f));
+    m_true_random_supported_text.setPosition(sf::Vector2<float>(100.0f, 0.0f));
     m_true_random_supported_text.setCharacterSize(11);
 
     // Initial title screen setup
@@ -224,7 +224,7 @@ private:
       } else {
         m_true_random_supported_text.setColor(sf::Color::Red);
         m_true_random_supported_text.setString(
-            "Hardware true random not supported by your x86_64 machine will be "
+            "Hardware true random not supported by your x86_64 or ARM64 machine will be "
             "using the standard random...");
       }
 
