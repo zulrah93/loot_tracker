@@ -50,7 +50,7 @@ public:
         m_mode{game_mode_t::menu} {
     // Load font
     m_font.loadFromFile(std::filesystem::current_path().string() +
-                        "/assets/GohuFontuni14NerdFont-Regular.ttf");
+                        "/GohuFontuni14NerdFont-Regular.ttf");
     m_true_random_supported_text.setFont(m_font);
     m_true_random_supported_text.setPosition(sf::Vector2<float>(150.0f, 0.0f));
     m_true_random_supported_text.setCharacterSize(11);
@@ -105,13 +105,13 @@ public:
 
     // Load menu background
     m_menu_texture.loadFromFile(std::filesystem::current_path().string() +
-                                "/assets/loot_tracker.png");
+                                "/loot_tracker.png");
     m_menu_background.setOrigin(sf::Vector2<float>(0.0f, 35.0f));
     m_menu_background.setTexture(m_menu_texture);
 
     // Load overworld background
     m_overworld_texture.loadFromFile(std::filesystem::current_path().string() +
-                                     "/assets/overworld_bg.png");
+                                     "/overworld_bg.png");
     m_overworld_background.setOrigin(sf::Vector2<float>(0.0f, 0.0f));
     m_overworld_background.setTexture(m_overworld_texture);
   }

@@ -1,7 +1,10 @@
 #ifndef TRUE_RNG_T_HPP
-#define TRUE_RNG_T_HPP'
-
+#define TRUE_RNG_T_HPP
+#ifndef __APPLE__
 #include "/usr/lib/gcc/x86_64-linux-gnu/15/include/cpuid.h"
+#else
+#include <sys/sysctl.h>
+#endif
 #include <cstdint>
 #include <cstring>
 #include <limits>
@@ -24,8 +27,16 @@ public:
     }
   }
 
-  // Helper used to check if your x86-64 machine supports it
+  // Helper used to check if your x86-64 machine supports it or use the equivalent for ARM
   static constexpr bool rdseed64_instruction_supported() {
+#ifdef __APPLE__
+    int is_feat_rng_set{0};
+    size_t size = sizeof(is_feat_rng_set);
+    if (-1 == sysctlbyname("hw.optional.arm.FEAT_RNG", &is_feat_rng_set, &size, nullptr, 0)) {
+        return false;
+    }
+    return is_feat_rng_set == 1;
+#else
     int32_t eax{7};
     int32_t ebx{0};
     int32_t ecx{0};
@@ -33,6 +44,7 @@ public:
     __cpuid(0, eax, ebx, ecx, edx);
     return (ebx & (1 << 18)) !=
            0; // If bit 18th is set then RDSEED is supported
+#endif
   }
 
   size_t next_random_value() {
@@ -85,6 +97,9 @@ public:
 
 private:
   static constexpr bool get_new_seed(size_t &seed) {
+#ifdef __APPLE__
+    return false;
+#else
     size_t temp_random_value{0};
     int got_carried{0};
 
@@ -96,6 +111,7 @@ private:
     }
 
     return false;
+#endif
   }
   size_t m_reseed_rate{0};
   size_t m_counter_to_reseed{0};

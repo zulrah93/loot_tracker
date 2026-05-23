@@ -1,0 +1,2 @@
+cp assets/* bin/
+clang++ src/main.cpp -I /opt/homebrew/Cellar/sfml@2/2.6.2_1/include -L /opt/homebrew/Cellar/sfml@2/2.6.2_1/lib -o bin/loot_tracker_game -cxx-isysteminclude -Wall --std=c++23 -lsfml-graphics -lsfml-window -lsfml-system -DDEBUG
