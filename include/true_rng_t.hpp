@@ -2,8 +2,10 @@
 #define TRUE_RNG_T_HPP
 #ifndef __APPLE__
 #include "/usr/lib/gcc/x86_64-linux-gnu/15/include/cpuid.h"
-#else
+#endif
+#if defined(__APPLE__) && defined(__aarch64__)
 #include <sys/sysctl.h>
+#include <sys/random.h>
 #endif
 #include <cstdint>
 #include <cstring>
@@ -29,7 +31,7 @@ public:
 
   // Helper used to check if your x86-64 machine supports it or use the equivalent for ARM
   static constexpr bool rdseed64_instruction_supported() {
-#ifdef __APPLE__
+#if defined(__aarch64__)
     int is_feat_rng_set{0};
     size_t size = sizeof(is_feat_rng_set);
     if (-1 == sysctlbyname("hw.optional.arm.FEAT_RNG", &is_feat_rng_set, &size, nullptr, 0)) {
@@ -97,8 +99,12 @@ public:
 
 private:
   static constexpr bool get_new_seed(size_t &seed) {
-#ifdef __APPLE__
-    return false;
+#if defined(__APPLE__) && defined(__aarch64__)
+    return 0 == getentropy(&seed, sizeof(size_t));
+#elif !defined(__APPLE__) && defined(__aarch64__)
+    uint64_t temp_seed;
+    asm("MRS %x[data], RNDRRS" : [data] "=r" (temp_seed));
+    return true;
 #else
     size_t temp_random_value{0};
     int got_carried{0};
